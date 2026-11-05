@@ -67,17 +67,17 @@ pipeline {
                 '''
             }
         }
-    }
-    stage('Deploy to EC2') {
-        steps {
-            sh '''
-                export IMAGE_TAG=$BUILD_NUMBER
-                docker compose pull
-                docker compose up -d --no-build --remove-orphans
-            '''
+        
+        stage('Deploy to EC2') {
+            steps {
+                sh '''
+                    export IMAGE_TAG=$BUILD_NUMBER
+                    docker compose pull
+                    docker compose up -d --no-build --remove-orphans
+                '''
             }
         }
-
+    }
     post {
         success {
             echo 'All three images successfully pushed to Amazon ECR!'
