@@ -68,6 +68,15 @@ pipeline {
             }
         }
     }
+    stage('Deploy to EC2') {
+        steps {
+            sh '''
+                export IMAGE_TAG=$BUILD_NUMBER
+                docker compose pull
+                docker compose up -d --no-build --remove-orphans
+            '''
+            }
+        }
 
     post {
         success {
