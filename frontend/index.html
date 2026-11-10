@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Microservices Dashboard</title>
+<style>
+body {
+  font-family: Arial;
+  background: #f1f5f9;
+  margin: 0;
+  padding: 30px;
+}
+h1 { color: #1e293b; }
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px #ddd;
+  overflow-x: auto;
+}
+.status { color: green; font-weight: bold; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+th { background: #e2e8f0; }
+button {
+  background: #2563eb;
+  color: white;
+  padding: 10px;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+@media(max-width:800px) {
+  .container { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<h1>Microservices Dashboard</h1>
+<p>Node.js Microservices Project</p>
+
+<div class="container">
+  <div class="card">
+    <h2>Users</h2>
+    <p id="users-status" class="status">Checking...</p>
+    <div id="users"></div>
+  </div>
+
+  <div class="card">
+    <h2>Products</h2>
+    <p id="products-status" class="status">Checking...</p>
+    <div id="products"></div>
+  </div>
+
+  <div class="card">
+    <h2>Orders</h2>
+    <p id="orders-status" class="status">Checking...</p>
+    <div id="orders"></div>
+  </div>
+</div>
+
+<script>
+async function load(service) {
+  const status = document.getElementById(service + '-status');
+  const output = document.getElementById(service);
+
+  try {
+    const response = await fetch('/' + service + '/');
+    if (!response.ok) throw new Error('Service unavailable');
+
+    const data = await response.json();
+    status.textContent = 'ONLINE';
+
+    const key = service;
+    const records = data[key];
+
+    if (!Array.isArray(records) || records.length === 0) {
+      output.textContent = 'No records available';
+      return;
+    }
+
+    const columns = Object.keys(records[0]);
+    const table = document.createElement('table');
+    const header = document.createElement('tr');
+
+    columns.forEach(column => {
+      const th = document.createElement('th');
+      th.textContent = column;
+      header.appendChild(th);
+    });
+
+    table.appendChild(header);
+
+    records.forEach(record => {
+      const row = document.createElement('tr');
+      columns.forEach(column => {
+        const td = document.createElement('td');
+        td.textContent = record[column];
+        row.appendChild(td);
+      });
+      table.appendChild(row);
+    });
+
+    output.replaceChildren(table);
+
+  } catch (error) {
+    status.textContent = 'OFFLINE';
+    status.style.color = 'red';
+    output.textContent = error.message;
+  }
+}
+
+['users', 'products', 'orders'].forEach(load);
+</script>
+
+</body>
+</html>
